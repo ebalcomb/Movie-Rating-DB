@@ -46,6 +46,7 @@ def main(session):
     # load_users(session)
     # load_movies(session)
     # load_ratings(session)
+    pass
 
 if __name__ == "__main__":
     s= model.connect()

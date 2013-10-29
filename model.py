@@ -2,10 +2,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
 
 ENGINE = None
 Session = None
-
+db_session = None
 Base = declarative_base()
 
 ### Class declarations go here
@@ -31,19 +33,22 @@ class Ratings(Base):
 	__tablename__ = "ratings"
 
 	id = Column(Integer, primary_key = True)
-	movie_id = Column(Integer)
-	user_id = Column(Integer)
+	movie_id = Column(Integer, ForeignKey('movies.id'))
+	user_id = Column(Integer, ForeignKey('users.id'))
 	rating = Column(Integer)
 
+	user = relationship("User", backref=backref("ratings", order_by=id))
+	movie = relationship("Movies", backref=backref("movies", order_by=id))
 
 def connect():
 	global ENGINE
-	global Session
+	global Session, session
 
 	ENGINE = create_engine("sqlite:///ratings.db", echo=True)
 	Session = sessionmaker(bind=ENGINE)
 
-	return Session()
+	db_session = Session()
+	return db_session
 
 
 ### End class declarations
