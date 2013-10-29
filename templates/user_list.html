@@ -1,0 +1,7 @@
+<html>
+<h1>IS THIS LOADING?</h2>
+{% for user in users %}
+<h2>User {{ user.id }}, age {{ user.age }} has {{ user.ratings|length }} ratings</h2>
+{% endfor %}
+<p>this is the end.</p>
+</html>
