@@ -40,17 +40,15 @@ class Ratings(Base):
 	movie = relationship("Movies", backref=backref("movies", order_by=id))
 
 # def connect():
-# 	global ENGINE
-# 	global Session, session
-
-# 	ENGINE = create_engine("sqlite:///ratings.db", echo=True)
-# 	Session = sessionmaker(bind=ENGINE)
-
-# 	db_session = Session()
-# 	return db_session
-
 
 ### End class declarations
+
+def authenticate(email, password):
+	this_user = db_session.query(User).filter_by(email = email, password = password).all()
+	if this_user:
+		return this_user[0].id
+	else:
+		return None	
 
 def main():
     """In case we need this for something"""
