@@ -44,11 +44,32 @@ class Ratings(Base):
 ### End class declarations
 
 def authenticate(email, password):
-	this_user = db_session.query(User).filter_by(email = email, password = password).all()
+	print email
+	print password
+	this_user = db_session.query(User).filter_by(email = email, password = password).first()
 	if this_user:
-		return this_user[0].id
+		return this_user.id
 	else:
 		return None	
+
+def register_check(email):
+	email = db_session.query(User).filter_by(email = email).first()
+	if email:
+		return True
+	else:
+		return False
+
+def register_store(email, password, age, zip_code):
+	print "Info we are passing to register_store:", email, password, age, zip_code
+	new_user = User(email= email, password= password, age=age, zipcode=zip_code)
+	db_session.add(new_user)
+	db_session.commit()
+
+	db_session.refresh(new_user)
+	return new_user.id
+
+	# new_user = db_session.query(User).filter_by(email = email).all()
+	#return new_user[0].id
 
 def main():
     """In case we need this for something"""

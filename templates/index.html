@@ -5,6 +5,11 @@
         <link href="/static/css/main.css" rel="stylesheet">
     </head>
     <body>
+    <div class="messages">
+    {% for message in get_flashed_messages() %}
+    <div class="my_message">{{message}}</div>
+    {% endfor %}
+    </div>
         <h1>Movie Ratings!</h1>
         <div class="container">
             <form class="signin" action="{{url_for("login")}}" method="POST">
@@ -15,13 +20,13 @@
             </form>
         </div>
          <div class="container">
-            <form class="signin" action="{{url_for("login")}}" method="POST">
+            <form class="signin" action="{{url_for("register")}}" method="POST">
                 <h2 class="signin-heading">Register for a new account:</h2>
-                <input type="text" class="form-control" placeholder="Email" name="email">
-                <input type="password" class = "form-control" placeholder="Password" name="password">
+                <input type="text" class="form-control" placeholder="Email" name="r_email">
+                <input type="password" class = "form-control" placeholder="Password" name="r_password">
                 <input type="password" class = "form-control" placeholder="Verify Password" name="password_verify">
                 <input type="text" class = "form-control" placeholder="Age" name="age">
-                <input type="text" class = "form-control" placeholder="Zip" name="zip">
+                <input type="text" class = "form-control" placeholder="Zip" name="zip_code">
                 <input type="submit" class="btn btn=lg btn-primary btn-block" value ="Submit">
             </form>
         </div>
