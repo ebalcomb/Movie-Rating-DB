@@ -84,8 +84,22 @@ def movie_profile(movie_id):
 
 @app.route("/rate_movie/<movie_id>", methods=["POST"])
 def rate_movie(movie_id):
+    best_fit = find_best_fit(movie_id)
+    predicted_rating = predict_rating(movie_id, best_fit)
 
-    # finds your best match/predicts what you should have rated this movie 
+        # take in a new rating from form on page
+    user_id = session.get("user_id")
+    rating = request.form.get("rating")
+
+    rating_exists = model.rating_check(movie_id, user_id)
+
+    message = respond_to_rating(rating, predicted_rating, rating_exists, user_id, movie_id)
+    flash(message)
+
+    return redirect("http://localhost:5000/movies/%s" %movie_id)
+
+
+def find_best_fit(movie_id):
     u = model.db_session.query(model.User).filter_by(id=session.get("user_id")).first()
     other_ratings = model.db_session.query(model.Ratings).filter_by(movie_id=movie_id).all()
     other_users = []
@@ -94,35 +108,49 @@ def rate_movie(movie_id):
         other_users.append(r.user)
     list_of_pearsons = []
     for other_u in other_users:
-        similarity = u.similarity(other_u)
-        sim_tuple = (similarity, other_u)
-        list_of_pearsons.append(sim_tuple)
+        if other_u.id != u.id:
+            similarity = u.similarity(other_u)
+            sim_tuple = (similarity, other_u)
+            list_of_pearsons.append(sim_tuple)
     sorted_pearsons = sorted(list_of_pearsons)
     best_fit = sorted_pearsons[-1]
+    
+    return best_fit
 
+def predict_rating(movie_id, best_fit):
     best_fit_row = model.db_session.query(model.Ratings).filter_by(user_id=best_fit[1].id, movie_id=movie_id).first()
     best_fit_rating = best_fit_row.rating 
     predict_rating = best_fit_rating*best_fit[0]
-    print predict_rating
-    # predict_rating_rounded = round(predict_rating, 0)
-    # print predict_rating_rounded
+    predict_rating_rounded = int(round(predict_rating, 0))
 
-    # take in a new rating from form on page
-    user_id = session.get("user_id")
-    rating = request.form.get("rating")
-    print "THE RATING:", rating
-    rating_exists = model.rating_check(movie_id, user_id)
+    return predict_rating_rounded
 
-    if rating_exists:
-        flash("Your rating for this movie has been updated.")
-        rating_id = model.rating_update(user_id, movie_id, rating)
-    else:
-        flash("Your rating for this movie has been saved.")
-        rating_id = model.rating_store(user_id, movie_id, rating)
 
-    return redirect("http://localhost:5000/movies/%s" %movie_id)
     
 
+def respond_to_rating(rating, predict_rating_rounded, rating_exists, user_id, movie_id):
+    if type(rating) == int:
+        i_rating = int(rating)
+        if i_rating in range(1, 6):
+
+            if rating_exists:
+                rating_id = model.rating_update(user_id, movie_id, i_rating)
+
+                if i_rating > predict_rating_rounded:
+                    return "Your rating for this movie has been updated. You gave it a %s?!?!? It only deserves a %s!!" %(i_rating, predict_rating_rounded)
+                elif i_rating < predict_rating_rounded:
+                    return"Your rating for this movie has been updated. You gave it a %s?!?!? It deserves at least a %s!!" %(i_rating, predict_rating_rounded) 
+
+            else:
+                rating_id = model.rating_store(user_id, movie_id, i_rating)
+
+                if i_rating > predict_rating_rounded:
+                    return"Your rating for this movie has been saved. You gave it a %s?!?!? It only deserves a %s!!" %(i_rating, predict_rating_rounded)
+                elif i_rating < predict_rating_rounded:
+                    return"Your rating for this movie has been saved. You gave it a %s?!?!? It deserves at least a %s!!" %(i_rating, predict_rating_rounded)
+
+    else:
+        return "Your rating must be a number between 1-5"
 
 
 

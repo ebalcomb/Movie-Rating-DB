@@ -123,12 +123,14 @@ def get_ratings_by_user(user_id):
 	user_ratings = db_session.query(Ratings).filter_by(user_id=user_id)
 	return user_ratings
 
+
 def get_ratings_by_movie(movie_id):
 	movie_ratings = db_session.query(Ratings).filter_by(movie_id=movie_id)
 	return movie_ratings
 
 def main():
     """In case we need this for something"""
+
     pass
 
 if __name__ == "__main__":
