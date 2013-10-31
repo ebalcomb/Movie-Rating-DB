@@ -84,11 +84,35 @@ def movie_profile(movie_id):
 
 @app.route("/rate_movie/<movie_id>", methods=["POST"])
 def rate_movie(movie_id):
+
+    # finds your best match/predicts what you should have rated this movie 
+    u = model.db_session.query(model.User).filter_by(id=session.get("user_id")).first()
+    other_ratings = model.db_session.query(model.Ratings).filter_by(movie_id=movie_id).all()
+    other_users = []
+
+    for r in other_ratings:
+        other_users.append(r.user)
+    list_of_pearsons = []
+    for other_u in other_users:
+        similarity = u.similarity(other_u)
+        sim_tuple = (similarity, other_u)
+        list_of_pearsons.append(sim_tuple)
+    sorted_pearsons = sorted(list_of_pearsons)
+    best_fit = sorted_pearsons[-1]
+
+    best_fit_row = model.db_session.query(model.Ratings).filter_by(user_id=best_fit[1].id, movie_id=movie_id).first()
+    best_fit_rating = best_fit_row.rating 
+    predict_rating = best_fit_rating*best_fit[0]
+    print predict_rating
+    # predict_rating_rounded = round(predict_rating, 0)
+    # print predict_rating_rounded
+
+    # take in a new rating from form on page
     user_id = session.get("user_id")
     rating = request.form.get("rating")
     print "THE RATING:", rating
     rating_exists = model.rating_check(movie_id, user_id)
-    
+
     if rating_exists:
         flash("Your rating for this movie has been updated.")
         rating_id = model.rating_update(user_id, movie_id, rating)
@@ -98,6 +122,8 @@ def rate_movie(movie_id):
 
     return redirect("http://localhost:5000/movies/%s" %movie_id)
     
+
+
 
 
 if __name__ == "__main__":
