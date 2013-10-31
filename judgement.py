@@ -18,11 +18,11 @@ def login():
     email = request.form.get("email")
     password = request.form.get("password")
 
-    print 5
-    user_id = model.authenticate(email, password)
-    if user_id != None:
-        session['user_id'] = user_id
-        return redirect("/users/%s" %user_id)
+    user_info = model.authenticate(email, password)
+    if user_info != None:
+        session['user_id'] = user_info[0]
+        session['email'] = user_info[1]
+        return redirect("/users/%s" %user_info[0])
     else:
         flash("Your login credentials are not recognized. Sorry!")
         return render_template("index.html")
@@ -35,20 +35,16 @@ def register():
     age = request.form.get("age")
     zip_code = request.form.get("zip_code")
 
-    print 1
 
     user_email = model.register_check(r_email)
     if user_email == True:
-        print 2
         flash("This email is already in use. Please try a new email or login to an existing account.")
         return redirect(url_for ("index"))  
     else:
         if r_password == password_verify:
-            print 3
             user_id = model.register_store(r_email, r_password, age, zip_code)
             return redirect("/users/%s" %user_id)
         else:
-            print 4
             flash("Your passwords did not match, please try again.")
             return redirect(url_for("index"))
 
@@ -75,14 +71,33 @@ def list_movies():
 
 @app.route("/users/<user_id>")
 def user_profile(user_id):
-    return render_template("user_profile.html")
+    user_ratings = model.get_ratings_by_user(user_id)
+    return render_template("user_profile.html", viewing_user=user_id, ratings=user_ratings)
 
 
 
 @app.route("/movies/<movie_id>")
 def movie_profile(movie_id):
-    return render_template("movie_profile.html")
+    movie_title = model.db_session.query(model.Movies).filter_by(id=movie_id).all()
+    movie_ratings = model.get_ratings_by_movie(movie_id)
+    return render_template("movie_profile.html", movie_name=movie_title[0].name, movie_id=movie_id, movie_ratings=movie_ratings)
 
+@app.route("/rate_movie/<movie_id>", methods=["POST"])
+def rate_movie(movie_id):
+    user_id = session.get("user_id")
+    rating = request.form.get("rating")
+    print "THE RATING:", rating
+    rating_exists = model.rating_check(movie_id, user_id)
+    
+    if rating_exists:
+        flash("Your rating for this movie has been updated.")
+        rating_id = model.rating_update(user_id, movie_id, rating)
+    else:
+        flash("Your rating for this movie has been saved.")
+        rating_id = model.rating_store(user_id, movie_id, rating)
+
+    return redirect("http://localhost:5000/movies/%s" %movie_id)
+    
 
 
 if __name__ == "__main__":

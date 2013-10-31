@@ -48,9 +48,17 @@ def authenticate(email, password):
 	print password
 	this_user = db_session.query(User).filter_by(email = email, password = password).first()
 	if this_user:
-		return this_user.id
+		return this_user.id, this_user.email
 	else:
 		return None	
+
+def rating_check(movie_id, user_id):
+	rating = db_session.query(Ratings).filter_by(user_id = user_id, movie_id= movie_id).all()
+	if rating:
+		return True
+	else:
+		return False
+
 
 def register_check(email):
 	email = db_session.query(User).filter_by(email = email).first()
@@ -59,8 +67,28 @@ def register_check(email):
 	else:
 		return False
 
+def rating_store(user_id, movie_id, rating):
+	new_rating = Ratings(user_id=user_id, movie_id=movie_id, rating=rating)
+	db_session.add(new_rating)
+	db_session.commit()
+
+	db_session.refresh(new_rating)
+	return new_rating.id
+
+def rating_update(user_id, movie_id, rating):
+	updated_rating = db_session.query(Ratings).filter_by(user_id=user_id, movie_id=movie_id).first()
+	updated_rating.rating = rating
+	db_session.commit()
+	db_session.refresh(updated_rating)
+	print "rating after update:", updated_rating.rating
+	return updated_rating
+
+
+
+
+
+
 def register_store(email, password, age, zip_code):
-	print "Info we are passing to register_store:", email, password, age, zip_code
 	new_user = User(email= email, password= password, age=age, zipcode=zip_code)
 	db_session.add(new_user)
 	db_session.commit()
@@ -70,6 +98,14 @@ def register_store(email, password, age, zip_code):
 
 	# new_user = db_session.query(User).filter_by(email = email).all()
 	#return new_user[0].id
+
+def get_ratings_by_user(user_id):
+	user_ratings = db_session.query(Ratings).filter_by(user_id=user_id)
+	return user_ratings
+
+def get_ratings_by_movie(movie_id):
+	movie_ratings = db_session.query(Ratings).filter_by(movie_id=movie_id)
+	return movie_ratings
 
 def main():
     """In case we need this for something"""

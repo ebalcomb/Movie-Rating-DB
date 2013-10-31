@@ -1,5 +1,10 @@
 {% extends 'master.html' %}
 
 {% block body %}
-    <h1>Somebody's Profile</h1>
+    <h1>User {{viewing_user}}'s Ratings</h1>
+        <ul>
+            {% for rating in ratings %}
+            <li><a href = "http://localhost:5000/movies/{{rating.movie_id}}">{{rating.movie.name }}</a> : {{ rating.rating }}</li>
+            {% endfor %}
+        </ul>
 {% endblock %}

@@ -5,8 +5,15 @@
         <link href="/static/css/main.css" rel="stylesheet">
     </head>
     <body>
-        <div class="display_name">Logged in user's email</div>
-        <div class="nav_bar">Nav Bar: My Profile | All Movies | All Users | Logout</div>
+        <div class="messages">
+        {% for message in get_flashed_messages() %}
+        <div class="my_message">{{message}}</div>
+        {% endfor %}
+        <div class="display_name">You are logged in as: {{session.get("email")}}</div>
+        <div class="nav_bar">
+            <h3>
+                <a href="http://localhost:5000/users/{{ session.get("user_id")}}">My Profile</a> | <a href="{{ url_for("list_movies") }}">All Movies</a> | <a href = "{{ url_for("list_users")}}">All Users</a> | <a href = "{{ url_for("clear_session")}}">Logout</a> </div>
+            </h3>
         <div class="container"></div>
         {% block body %}
         {% endblock %}

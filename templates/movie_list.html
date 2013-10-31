@@ -3,6 +3,6 @@
 {% block body %}
     <h1>Movies</h1>
         {% for movie in movies %}
-    <h3>Movie {{ movie.name }}, Release Date {{ movie.released_at }} IMDB {{ movie.imdb_url }}</h3>
+    <h3><a href= "http://localhost:5000/movies/{{movie.id}}">Movie {{ movie.name }}</a>, Release Date {{ movie.released_at }} IMDB {{ movie.imdb_url }}</h3>
     {% endfor %}
 {% endblock %}

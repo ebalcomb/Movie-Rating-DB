@@ -1,5 +1,17 @@
 {% extends 'master.html' %}
 
 {% block body %}
-    <h1>Some Movie's Profile</h1>
+    <h1>{{movie_name}}</h1>
+        <div class="container">
+            <form class="signin" action="http://localhost:5000/rate_movie/{{ movie_id }}" method="POST">
+                <h2 class="signin-heading">Rate this movie:</h2>
+                <input type="text" class="form-control" placeholder="Rating(1-5)" name="rating">
+                <input type="submit" class="btn btn=lg btn-primary btn-block" value ="Submit">
+            </form>
+        </div>
+    <ul>
+    {% for movie in movie_ratings %}
+    <li><a href ="http://localhost:5000/users/{{movie.user_id}}">User {{movie.user_id}}</a> rated this movie: {{movie.rating}}</li>
+    {% endfor %}
+</ul>
 {% endblock %}
